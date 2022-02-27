@@ -15,17 +15,29 @@ func main() {
 	fmt.Println(Eval("1 - 2 + 3"))
 	fmt.Println(Eval("3 * ( 3 + 1 * 3 ) / 2"))
 	fmt.Println(Eval("3 * ( ( 3 + 1 ) * 3 ) / 2"))
+
+	// Outputs :
+	// 5
+	// 3
+	// 2
+	// 9
+	// 18
 }
 
 func Eval(expr string) int {
+	// ops는 연산자를 담는 스택(슬라이스).
 	var ops []string
+	// nums는 정수들을 담는 스택(슬라이스).
 	var nums []int
+
+	//pop은 스택의 마지막 숫자를 출력하는 익명함수를 변수로써 지정
 	pop := func() int {
 		last := nums[len(nums)-1]
 		nums = nums[:len(nums)-1]
 		return last
 	}
 
+	//reduce는 숫자,연산자들을 구분하여 처리하는 익명함수를 변수로써 지정
 	reduce := func(higher string) {
 		for len(ops) > 0 {
 			op := ops[len(ops)-1]
@@ -71,6 +83,7 @@ func Eval(expr string) int {
 			nums = append(nums, num)
 		}
 	}
+
 	reduce("+-*/")
 
 	return nums[0]
