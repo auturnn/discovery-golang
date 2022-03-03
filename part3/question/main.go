@@ -6,6 +6,9 @@ import (
 
 func main() {
 	questionOne([]string{"사과", "바나나", "토마토", "약", "ㅁㄴ"})
+	questionTwo([]int{11, 1, 4, 6, 12, 5, 2, 5, 12, 123, 51, 0})
+	questionThree([]string{"한개", "두개", "세개"}, "두개")
+	questionFour("pop", "")
 }
 
 // 마지막글자에 받침이 있는 경우에도 어색하지않은 조사가 붙어서 출력되도록 코드를 수정하라.
@@ -28,7 +31,62 @@ func questionOne(ss []string) {
 				fmt.Printf("%s은 받침이 있다.\n", string(r))
 			}
 		} else {
-			fmt.Printf("%s은(는) 판별에 유효한 문자가 아닙니다.", string(r))
+			fmt.Printf("%s은(는) 판별에 유효한 문자가 아닙니다.\n", string(r))
 		}
 	}
+}
+
+// []int 슬라이스를 넘겨받아 오름차순으로 정렬하는 함수를 작성하라.
+// 슬라이스 a의 i,j값을 맞바꿀때는 a[i], a[j] = a[j], a[i]를 참고하라.
+func questionTwo(a []int) {
+	for i := range a {
+		for j := i + 1; j < len(a); j++ {
+			if a[i] > a[j] {
+				a[i], a[j] = a[j], a[i]
+			}
+		}
+	}
+	fmt.Println(a)
+}
+
+//정렬된 문자열 슬라이스가 있을 때, 특정 문자열이 슬라이스에 있는지를 조사하는 함수를 작성하라.
+func questionThree(ss []string, a string) {
+	for _, s := range ss {
+		if s == a {
+			fmt.Printf("'%s'는 해당 슬라이스 안에 존재합니다.\n", a)
+			break
+		}
+	}
+}
+
+type Queue struct {
+	data interface{}
+}
+
+// 슬라이스를 이용하여 큐(queue)를 구현하라. 큐에 자료를 넣는 것은 append를 이용하고,
+// 자료를 꺼낼때는 q= q[1:]를 이용하라
+// 또한 위와같은 방법을 지속적으로 사용하였을때 문제가 일어날지, 일어나지 않을지를 생각하라.
+func questionFour(action string, data ...interface{}) {
+	q := []interface{}{"firstIn"}
+	if action == "add" {
+		// 용량을 정해두지 않은 슬라이스가 append를 할때 초과되면,
+		// 원래의 용량만큼을 다시 만들어 붙이는 방법이기 때문에 해당 방법은 계속되면 메모리 누수가 심해질 것이다.
+		// ex) cap:2인 슬라이스 q 에 append를 3번 진행할 경우 용량이 초과되기 때문에
+		// q+q의 용량을 가진 새로운 슬라이스를 생성하여 append를 진행하게 된다.
+		q = append(q, data...)
+	} else if action == "pop" {
+		// 이렇게 삭제를 진행할 경우 슬라이스의 용량은 변함이 없는데,
+		// 슬라이스가 보고있는 범위만 바뀔뿐이다.
+		q = q[1:]
+	} else {
+		fmt.Println("해당 명령은 유효하지않습니다. [info]: add, pop")
+	}
+
+	fmt.Println(q)
+
+	// 구조체를 활용
+	// queue := []Queue{}
+	// queue = append(queue, Queue{data: data})
+	// queue = queue[1:]
+	// fmt.Println(queue)
 }
