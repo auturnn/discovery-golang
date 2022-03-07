@@ -91,24 +91,24 @@ func questionFour(action string, data ...interface{}) {
 func questionFive() {
 	//다음과 같은 예제가 동작하도록 함수를 작성한다.
 	m := NewMultiSet()
-	fmt.Println(String(m))
-	fmt.Println(Count(m, "3"))
-	Insert(m, "3")
-	Insert(m, "3")
-	Insert(m, "3")
-	Insert(m, "3")
-	fmt.Println(String(m))
-	fmt.Println(Count(m, "3"))
-	Insert(m, "1")
-	Insert(m, "2")
-	Insert(m, "5")
-	Insert(m, "7")
-	Erase(m, "3")
-	Erase(m, "5")
-	fmt.Println(Count(m, "3"))
-	fmt.Println(Count(m, "1"))
-	fmt.Println(Count(m, "2"))
-	fmt.Println(Count(m, "5"))
+	fmt.Println(m.String())
+	fmt.Println(m.Count("3"))
+	m.Insert("3")
+	m.Insert("3")
+	m.Insert("3")
+	m.Insert("3")
+	fmt.Println(m.String())
+	fmt.Println(m.Count("3"))
+	m.Insert("1")
+	m.Insert("2")
+	m.Insert("5")
+	m.Insert("7")
+	m.Erase("3")
+	m.Erase("5")
+	fmt.Println(m.Count("3"))
+	fmt.Println(m.Count("1"))
+	fmt.Println(m.Count("2"))
+	fmt.Println(m.Count("5"))
 	//Output:
 	// {  }
 	// 0
@@ -120,30 +120,34 @@ func questionFive() {
 	// 0
 }
 
+type MultiSet map[string]int
+
 //새로운 MultiSet을 생성하여 반환한다.
-func NewMultiSet() map[string]int {
+func NewMultiSet() MultiSet {
 	return make(map[string]int)
 }
 
 //Insert 함수는 집합에 val을 추가한다.
-func Insert(m map[string]int, val string) {
+func (m MultiSet) Insert(val string) {
 	m[val]++
 }
 
-func Erase(m map[string]int, val string) {
-	m[val]--
+func (m MultiSet) Erase(val string) {
+	if m[val] <= 1 {
+		delete(m, val)
+	} else {
+		m[val]--
+	}
 }
 
-func Count(m map[string]int, val string) int {
+func (m MultiSet) Count(val string) int {
 	return m[val]
 }
 
-func String(m map[string]int) string {
+func (m MultiSet) String() string {
 	s := []string{}
 	for key, val := range m {
-		for i := 0; i < val; i++ {
-			s = append(s, key)
-		}
+		s = append(s, strings.Repeat(string(key)+" ", val))
 	}
-	return fmt.Sprintf("{ %s }", strings.Join(s, " "))
+	return fmt.Sprintf("{ %s}", strings.Join(s, ""))
 }
