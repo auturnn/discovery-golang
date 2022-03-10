@@ -24,6 +24,12 @@ func main() {
 	fmt.Println(2, 4)
 
 	fmt.Println(Sqrt(2))
+
+	ExampleNewEvaluator()
+	ExampleVertexID_print()
+	ExampleVertexID_String()
+
+	ExampleWriteTo()
 }
 
 // NewIntGenerator 함수는 생성기(generator)의 예시이자 고계함수이다.
@@ -148,6 +154,7 @@ func ExampleBinOpToBinSub() {
 	})
 	sub(5, 6)
 	sub(5, 7)
+
 	count := sub(5, 7)
 	fmt.Println("count:", count)
 	//Output:
