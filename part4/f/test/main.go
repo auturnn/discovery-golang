@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-//1. 이번 장에서 만들어본 계산기 함수는 각 연산자와 숫자 사이에 비난이 반드시 하나씩 있어야 한다. 빈칸이 여럿 있더라도 잘 동작하게 개선해보자.
+//1. 이번 장에서 만들어본 계산기 함수는 각 연산자와 숫자 사이에 빈 칸이 반드시 하나씩 있어야 한다. 빈 칸이 여럿 있더라도 잘 동작하게 개선해보자.
 //2. 이번 장에서 만들어본 계산기 함수는에러 처리를 하지 않는다. 정수와 에러를 돌려주도록 개선해보자.
 func main() {
 	ExampleNewEvaluator()
@@ -24,8 +24,8 @@ func NewStrSet(strs ...string) StrSet {
 	return m
 }
 
-func NewEvaluator(opMap map[string]BinOp, prec PrecMap) func(expr string) int {
-	return func(expr string) int {
+func NewEvaluator(opMap map[string]BinOp, prec PrecMap) func(expr string) (int, error) {
+	return func(expr string) (int, error) {
 		return Eval(opMap, prec, expr)
 	}
 }
@@ -33,7 +33,7 @@ func NewEvaluator(opMap map[string]BinOp, prec PrecMap) func(expr string) int {
 //Map keyed by operator to set of higher percedence operators
 type PrecMap map[string]StrSet
 
-func Eval(opMap map[string]BinOp, prec PrecMap, expr string) int {
+func Eval(opMap map[string]BinOp, prec PrecMap, expr string) (int, error) {
 	ops := []string{"("} // 초기 여는 괄호
 	var nums []int
 	pop := func() int {
@@ -62,6 +62,13 @@ func Eval(opMap map[string]BinOp, prec PrecMap, expr string) int {
 	}
 
 	for _, token := range strings.Split(expr, " ") {
+		// 1번 정답.
+		// 밑에서 token의 빈칸을 확인하면
+		// 다음 루프로 넘겨서 슬라이스에 추가하는 것을 넘겨버림으로 회피.
+		if token == "" {
+			continue
+		}
+
 		if token == "(" {
 			ops = append(ops, token)
 		} else if _, ok := prec[token]; ok {
@@ -77,7 +84,7 @@ func Eval(opMap map[string]BinOp, prec PrecMap, expr string) int {
 	}
 
 	reduce(")") //초기의 여는 괄호까지 모두 계산
-	return nums[0]
+	return nums[0], nil
 }
 
 func ExampleNewEvaluator() {
@@ -111,8 +118,8 @@ func ExampleNewEvaluator() {
 
 	fmt.Println("---Start Func ExampleNewEvaluator---")
 	fmt.Println(eval("5"))
-	fmt.Println(eval("1 + 2"))
-	fmt.Println(eval("1 - 2 - 4"))
+	fmt.Println(eval("1 +  2"))
+	fmt.Println(eval("{ 1 - 2 - 4 }"))
 	fmt.Println(eval("( 3 - 2 ** 3) * ( -2 )"))
 	fmt.Println(eval("3 * ( 3 + 1 * 3 ) / ( -2 )"))
 	fmt.Println(eval("3 * ( ( 3 + 1 ) * 3 ) / 2"))
@@ -120,6 +127,7 @@ func ExampleNewEvaluator() {
 	fmt.Println(eval("2 ** 3 mod 3"))
 	fmt.Println(eval("2 ** 2 ** 3"))
 	fmt.Println("---End Func ExampleNewEvaluator---")
+
 	// Output:
 	// 5
 	// 3
