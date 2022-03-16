@@ -22,6 +22,7 @@ func (c *CaseInsensivie) Push(x interface{}) {
 func (c *CaseInsensivie) Pop() interface{} {
 	len := c.Len()
 	last := (*c)[len-1]
+	*c = (*c)[:len-1]
 	return last
 }
 
@@ -29,7 +30,9 @@ func ExampleCaseInsensitive_heap() {
 	apple := CaseInsensivie([]string{
 		"iPhone", "iPad", "MacBook", "AppStore",
 	})
+
 	heap.Init(&apple)
+
 	for apple.Len() > 0 {
 		fmt.Println(heap.Pop(&apple))
 	}
