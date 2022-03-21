@@ -6,42 +6,53 @@ import (
 )
 
 func main() {
-	questionOne([]string{"사과", "바나나", "토마토", "약", "ㅁㄴ"})
-	questionTwo([]int{11, 1, 4, 6, 12, 5, 2, 5, 12, 123, 51, 0})
+	Example_array()
+	ExampleASC([]int{11, 1, 4, 6, 12, 5, 2, 5, 12, 123, 51, 0})
+
+	//TODO 함수이름 수정
 	questionThree([]string{"한개", "두개", "세개"}, "두개")
 	questionFour("pop", "")
 	questionFive()
 }
 
 // 마지막글자에 받침이 있는 경우에도 어색하지않은 조사가 붙어서 출력되도록 코드를 수정하라.
-func questionOne(ss []string) {
-	//일반적으로 유니코드를 외우지는 않는다고 생각하여
-	//한글유니코드의 시작점, 끝점을 알아내고 실행하는 것으로 시작한다.
-	start := []rune("가")
-	end := []rune("힣")
-	for _, s := range ss {
-		// 이전에는 for를 통해 unicode를 추출하여 사용했다.
-		// 하지만 이번 문제에서는 조사를 어느것으로 붙일지, 즉 마지막 글자의 유니코드만 확인하면 된다.
-		// 그렇기때문에 밑의 방법처럼 글자를 []rune에 담은뒤
-		// 마지막 글자만을 확인하기 위한 코드를 작성하였다.
-		r := []rune(s)
-		l := r[len(r)-1]
-		if start[0] <= l && l <= end[0] {
-			if ((l - start[0]) % 28) == 0 {
-				fmt.Printf("%s는 받침이 없다.\n", string(r))
+//1번 예제 답
+func Example_array() {
+	fruits := [6]string{"사과", "바나나", "토마토", "감", "귤", "asdasd"}
+
+	start := []rune("가") //한글유니코드의 시작점 (44032)
+	end := []rune("힣")   //한글유니코드의 끝점   (55203)
+
+	for _, fruit := range fruits {
+		r := []rune(fruit)
+		last := r[len(r)-1]
+		if start[0] <= last && last <= end[0] { // 한글유니코드에 포함되는가?
+
+			if ((last - start[0]) % 28) == 0 {
+				// 받침 존재하지 않을 시 국어문법에 따라 '는'을 조사로 붙인다.
+				fmt.Printf("%s는 맛있다.\n", string(r))
 			} else {
-				fmt.Printf("%s은 받침이 있다.\n", string(r))
+				// 받침 존재하지 않을 시 국어문법에 따라 '은'을 조사로 붙인다.
+				fmt.Printf("%s은 맛있다.\n", string(r))
 			}
-		} else {
+		} else { // 에러처리 한글 유니코드상 해당 문자가 없을 경우
 			fmt.Printf("%s은(는) 판별에 유효한 문자가 아닙니다.\n", string(r))
 		}
 	}
+	// Output
+	// 사과는 맛있다.
+	// 바나나는 맛있다.
+	// 토마토는 맛있다.
+	// 감은 맛있다.
+	// 귤은 맛있다.
 }
 
 // []int 슬라이스를 넘겨받아 오름차순으로 정렬하는 함수를 작성하라.
 // 슬라이스 a의 i,j값을 맞바꿀때는 a[i], a[j] = a[j], a[i]를 참고하라.
-func questionTwo(a []int) {
+func ExampleASC(a []int) {
+	fmt.Println(len(a))
 	for i := range a {
+		fmt.Println(i)
 		for j := i + 1; j < len(a); j++ {
 			if a[i] > a[j] {
 				a[i], a[j] = a[j], a[i]
