@@ -12,7 +12,7 @@ func main() {
 	//TODO 함수이름 수정
 	AnswerThree([]string{"한개", "두개", "세개"}, "두개")
 	AnswerQueue()
-	AnswerFive()
+	AnswerMultiSet()
 }
 
 // 마지막글자에 받침이 있는 경우에도 어색하지않은 조사가 붙어서 출력되도록 코드를 수정하라.
@@ -117,16 +117,59 @@ func AnswerQueue() {
 	// 이처럼 자료가 없더라도 메모리에 해당 용량만큼의 자리를 미리 예약해두는 것은
 	// 성능상으로 좋지않은 결과를 초래한다고 생각된다.
 
-	// 두가지 관점 모두를 통합하여 결론을 내린다면 Queue에 들어갈 자료의 수를 알고, 길이와 용량을 사전 설정해두는 것이라면
-	// 삽입과 삭제 모두 문제가 되지 않지만, 미정된 길이와 용량을 가진 슬라이스의 경우 Append가 문제될수 있다고 생각된다.
-	// 허나 슬라이스가 배열보다 자주쓰이는 이유인 '유연한 구조' 라는 이점을 생각한다면
-	// 틀린 답일 것이라고도 보인다.
 	fmt.Println(q)
 }
 
-//같은 원소가 여러 번 들어갈 수 있는 집합인 MultiSet을 기본제공하는 Map을 이용하자
-func AnswerFive() {
-	//다음과 같은 예제가 동작하도록 함수를 작성한다.
+// 5번 문제 해답
+// 문제에서는 메서드를 이용하지 않는 코드로 예제가 작성되어 있지만,
+// 여기에서는 메서드를 사용하여 조금 더 깔끔하고 MultiSet이 강조된(?) 코드를 작성해보았다.
+// 따라서 예제 또한 아래의 ExampleMultiSet과 같이 변경하였다.
+type MultiSet map[string]int
+
+//새로운 MultiSet을 생성하여 반환한다.
+func NewMultiSet() MultiSet {
+	return make(map[string]int)
+}
+
+//Insert 함수는 집합에 val을 추가한다.
+func (m MultiSet) Insert(val string) {
+	// key를 추가하고, 함수가 호출될때마다 value를 +1씩 증가시킨다.
+	m[val]++
+}
+
+//Erase 함수는 집합에서 val을 제거한다.
+//집합에 val이 없는 경우에는 아무일도 일어나지 않는다.
+func (m MultiSet) Erase(val string) {
+	// key에 등록된 정수가 1 이하일 경우
+	// -1을 했을 경우 0이 되기 때문에 delete를 통해서 key와 함께 지워준다.
+	// 이외의 모든 경우에는 -1씩 감소시킨다.
+	if m[val] <= 1 {
+		delete(m, val)
+	} else {
+		m[val]--
+	}
+}
+
+//Count 함수는 집합에 val이 들어 있는 횟수를 구한다.
+func (m MultiSet) Count(val string) int {
+	return m[val]
+}
+
+//String 함수는 집합에 들어 잇는 원소들을 { } 안에 빈 칸으로
+//구분하여 넣은 문자열을 반환한다.
+func (m MultiSet) String() string {
+	// strings.Join을 이용하기 위한 string슬라이스 선언
+	s := []string{}
+
+	// key, value를 꺼내어 value만큼 key를 반복해서 슬라이스에 삽입
+	for key, val := range m {
+		s = append(s, strings.Repeat(string(key)+" ", val))
+	}
+	return fmt.Sprintf("{ %s}", strings.Join(s, ""))
+}
+
+// 변환 예제
+func AnswerMultiSet() {
 	m := NewMultiSet()
 	fmt.Println(m.String())
 	fmt.Println(m.Count("3"))
@@ -155,36 +198,4 @@ func AnswerFive() {
 	// 1
 	// 1
 	// 0
-}
-
-type MultiSet map[string]int
-
-//새로운 MultiSet을 생성하여 반환한다.
-func NewMultiSet() MultiSet {
-	return make(map[string]int)
-}
-
-//Insert 함수는 집합에 val을 추가한다.
-func (m MultiSet) Insert(val string) {
-	m[val]++
-}
-
-func (m MultiSet) Erase(val string) {
-	if m[val] <= 1 {
-		delete(m, val)
-	} else {
-		m[val]--
-	}
-}
-
-func (m MultiSet) Count(val string) int {
-	return m[val]
-}
-
-func (m MultiSet) String() string {
-	s := []string{}
-	for key, val := range m {
-		s = append(s, strings.Repeat(string(key)+" ", val))
-	}
-	return fmt.Sprintf("{ %s}", strings.Join(s, ""))
 }
