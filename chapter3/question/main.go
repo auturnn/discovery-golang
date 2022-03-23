@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -13,6 +14,7 @@ func main() {
 	AnswerThree([]string{"한개", "두개", "세개"}, "두개")
 	AnswerQueue()
 	AnswerMultiSet()
+	ExampleCaseInsensitive_sort()
 }
 
 // 마지막글자에 받침이 있는 경우에도 어색하지않은 조사가 붙어서 출력되도록 코드를 수정하라.
@@ -198,4 +200,62 @@ func AnswerMultiSet() {
 	// 1
 	// 1
 	// 0
+}
+
+// 3번 해답
+// 이진 검색 알고리즘은 우선 정렬이 된 슬라이스(배열)에 대해 사용하는 알고리즘인데,
+// 정렬부터 만든다...인가?
+
+type CaseInsensivie []string
+
+func (c CaseInsensivie) Len() int {
+	return len(c)
+}
+
+func (c CaseInsensivie) Less(i, j int) bool {
+	return strings.ToLower(c[i]) < strings.ToLower(c[j]) ||
+		(strings.ToLower(c[i]) == strings.ToLower(c[j]) && c[i] < c[j])
+}
+
+func (c CaseInsensivie) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
+
+func (c CaseInsensivie) BinarySearch(s string) bool {
+	ok := false
+
+	if strings.ToLower(c[0]) > strings.ToLower(s) ||
+		strings.ToLower(c[len(c)-1]) < strings.ToLower(s) {
+		fmt.Println("걸림")
+		return false
+	} else {
+		start := 0
+		end := len(c) - 1
+		for start <= end {
+			mid := (start + end) / 2
+			if strings.ToLower(c[mid]) > strings.ToLower(s) {
+				end = mid - 1
+				fmt.Println("hi 1")
+			} else if strings.ToLower(c[mid]) < strings.ToLower(s) {
+				start = mid + 1
+				fmt.Println("hi 2")
+			} else if strings.ToLower(c[mid]) == strings.ToLower(s) {
+				ok = true
+				break
+			}
+		}
+	}
+
+	return ok
+}
+
+func ExampleCaseInsensitive_sort() {
+	apple := CaseInsensivie([]string{
+		"iPhone", "iPad", "MacBook", "AppStore",
+	})
+	sort.Sort(apple)
+	fmt.Println(apple)
+	fmt.Println(apple.BinarySearch("macbook"))
+	//Output:
+	//[AppStore iPad iPhone MacBook]
 }
