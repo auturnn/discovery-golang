@@ -204,7 +204,10 @@ func AnswerMultiSet() {
 
 // 3번 해답
 // 이진 검색 알고리즘은 우선 정렬이 된 슬라이스(배열)에 대해 사용하는 알고리즘인데,
-// 정렬부터 만든다...인가?
+// 정렬부터 만든다...인가? 라고 생각되어서
+// 5장의 sort관련 내용부터 보고 문제를 풀게 되었다.
+// 그 중에서 마침 적용가능한 코드를 찾게되어 해당 코드를 가져와 사용하여 정렬 후,
+// 이진 탐색을 진행하도록 하겠다.
 
 type CaseInsensivie []string
 
@@ -221,41 +224,59 @@ func (c CaseInsensivie) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 
+// 만들어 놓고보니 이진탐색 자체가 빠른 장점이있는데,
+// 밑의 if 코드를 통해 걸러 낼 수 있는 것은 기껏해야 데이터 범위 내에
+// 존재하는 지의 여부만을 알아내는 것이기 때문에 비효율적이라고 판단하였다.
+// func (c CaseInsensivie) Search(s string) bool {
+// 	// 이진탐색을 시작하기 전
+// 	// 슬라이스내의 데이터보다 작거나, 끝보다 크면 false를 반환한다.
+// 	if strings.ToLower(c[0]) > strings.ToLower(s) ||
+// 		strings.ToLower(c[len(c)-1]) < strings.ToLower(s) {
+// 		return false
+// 	}
+
+// 	return c.BinarySearch(s)
+// }
+
 func (c CaseInsensivie) BinarySearch(s string) bool {
 	ok := false
 
-	if strings.ToLower(c[0]) > strings.ToLower(s) ||
-		strings.ToLower(c[len(c)-1]) < strings.ToLower(s) {
-		fmt.Println("걸림")
-		return false
-	} else {
-		start := 0
-		end := len(c) - 1
-		for start <= end {
-			mid := (start + end) / 2
-			if strings.ToLower(c[mid]) > strings.ToLower(s) {
-				end = mid - 1
-				fmt.Println("hi 1")
-			} else if strings.ToLower(c[mid]) < strings.ToLower(s) {
-				start = mid + 1
-				fmt.Println("hi 2")
-			} else if strings.ToLower(c[mid]) == strings.ToLower(s) {
-				ok = true
-				break
-			}
+	start := 0
+	end := len(c) - 1
+	for start <= end {
+		mid := (start + end) / 2
+		// 아래의 코드에서는 총 3가지의 경우의 수를 가지고 반복문을 진행한다.
+		// 타겟데이터가 검색범위 중간값보다 작을 때, 클 때, 같을 때
+
+		// 1. 작을 때는 중간 값보다 앞에 존재한다는 의미이기 때문에,
+		// 검색범위를 뒤에서부터 당겨서 반복문을 다시 진행한다.
+		if strings.ToLower(c[mid]) > strings.ToLower(s) {
+			end = mid - 1
+
+			// 2. 클 때는 중간 값보다 뒤에 존재한다는 의미이기 때문에,
+			// 검색범위를 앞에서부터 당겨 반복문을 다시 진행한다.
+		} else if strings.ToLower(c[mid]) < strings.ToLower(s) {
+			start = mid + 1
+
+			// 3. 같을 때는 ok를 true로 변경하고 반환할 수 있도록 반복문을 정지시킨다.
+		} else if strings.ToLower(c[mid]) == strings.ToLower(s) {
+			ok = true
+			break
 		}
 	}
 
 	return ok
+
 }
 
 func ExampleCaseInsensitive_sort() {
 	apple := CaseInsensivie([]string{
 		"iPhone", "iPad", "MacBook", "AppStore",
 	})
+
 	sort.Sort(apple)
 	fmt.Println(apple)
-	fmt.Println(apple.BinarySearch("macbook"))
+	fmt.Println(apple.BinarySearch("MacBook"))
 	//Output:
 	//[AppStore iPad iPhone MacBook]
 }
