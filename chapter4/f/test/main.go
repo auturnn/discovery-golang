@@ -12,18 +12,14 @@ func main() {
 	ExampleNewEvaluator()
 }
 
-type BinOp func(int, int) int
-type BinSub func(int, int) int
 type StrSet map[string]struct{}
 
-func NewStrSet(strs ...string) StrSet {
-	m := StrSet{}
-	for _, str := range strs {
-		m[str] = struct{}{}
-	}
-	return m
-}
+//연산자를 담아 계산
+type BinOp func(int, int) int
 
+// 함수를 받거나, 함수를 넘기는 것을 좀 더 고차원적인 함수라는 뜻으로
+// 고계함수(higher-order function)라 칭한다고 한다.
+// 아래의 NewEvaluaotor 또한 반환값으로 function을 반환하고 있기에 고계함수에 속한다.
 func NewEvaluator(opMap map[string]BinOp, prec PrecMap) func(expr string) (int, error) {
 	return func(expr string) (int, error) {
 		return Eval(opMap, prec, expr)
@@ -34,8 +30,11 @@ func NewEvaluator(opMap map[string]BinOp, prec PrecMap) func(expr string) (int, 
 type PrecMap map[string]StrSet
 
 func Eval(opMap map[string]BinOp, prec PrecMap, expr string) (int, error) {
-	ops := []string{"("} // 초기 여는 괄호
-	var nums []int
+	// 초기 여는 괄호
+	ops := []string{"("}
+
+	nums := []int{}
+
 	pop := func() int {
 		last := nums[len(nums)-1]
 		nums = nums[:len(nums)-1]
@@ -49,6 +48,7 @@ func Eval(opMap map[string]BinOp, prec PrecMap, expr string) (int, error) {
 				//더 낮은 순위 연산자이므로 여기서 계산 종료
 				return
 			}
+
 			ops = ops[:len(ops)-1]
 			if op == "(" {
 				//괄호를 제거하였으므로 종료
@@ -83,8 +83,16 @@ func Eval(opMap map[string]BinOp, prec PrecMap, expr string) (int, error) {
 		}
 	}
 
-	reduce(")") //초기의 여는 괄호까지 모두 계산
+	reduce(")") //닫는 괄호까지 모두 계산
 	return nums[0], nil
+}
+
+func NewStrSet(strs ...string) StrSet {
+	m := StrSet{}
+	for _, str := range strs {
+		m[str] = struct{}{}
+	}
+	return m
 }
 
 func ExampleNewEvaluator() {
