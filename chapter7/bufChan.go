@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"sync"
 )
 
 func ExampleClosedChannel() {
@@ -88,7 +88,7 @@ func FanOut() {
 	for i := 0; i < 3; i++ {
 		go func(i int) {
 			for n := range c {
-				time.Sleep(1)
+				// time.Sleep(1)
 				fmt.Println(i, n)
 			}
 		}(i)
@@ -97,4 +97,107 @@ func FanOut() {
 		c <- i
 	}
 	close(c)
+}
+
+// 위와 반대로 팬인하기
+// 팬 인(Fan-In) : 논리회로에서 주로 쓰이는 용어. 하나의 게이트에 여러개의 입력선이 들어가는 경우를 팬인이라고 한다.
+// 우표를 만든다고 가정하면 여러 사람들이 만든 결과물을 모아 상자에 넣는 사람은 혼자서도 빠르게 일처리가 가능할 것이다.
+// 이것을 코드로 옮겼을 때, 첫 방법은 채널을 공유하는 것.
+// 다만 해당 방법은 채널을 닫는 것에 주의하여야 한다.
+// 채널을 닫을 때는 채널을 닫기위해 고루틴을 하나 더 만들어 사용한다.
+
+func FanIn(ins ...<-chan int) <-chan int {
+	out := make(chan int)
+	var wg sync.WaitGroup
+	wg.Add(len(ins))
+	for _, in := range ins {
+		//아래의 고루틴을 보면 in을 넘겨주는 것을 볼 수 있는데,
+		// 이렇게 하지않으면 in값이 변경된 이후에 고루틴이 돌아갈 수도 있다.
+		go func(in <-chan int) {
+			defer wg.Done()
+			for num := range in {
+				out <- num
+			}
+		}(in)
+	}
+
+	// 백그라운드에서 대기하다가 모든 고루틴이 끝나면(wg.Done()) 채널을 닫는다.
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+	return out
+}
+
+// Distribute 함수는 IntPipe형태의 함수를 받고 n개로 분산처리하는 함수로 돌려주는 함수.
+// 팬아웃해서 파이프라인을 통과시키고 다시 팬인시키면 분산처리가 된다.
+// 그러므로 이 함수는 팬아웃과 팬인을 모두 수행하는 함수이다.
+func Distribute(p IntPipe, n int) IntPipe {
+	return func(in <-chan int) <-chan int {
+		cs := make([]<-chan int, n)
+		// IntPipe를 통해 FanOut
+		for i := 0; i < 0; i++ {
+			cs[i] = p(in)
+		}
+		return FanIn(cs...)
+	}
+}
+
+//고루틴의 갯수가 많은 것은 크게 걱정할 필요가 없다.
+//Go에서는 고루틴마다 스레드를 모두 할당하지 않으며, 동시에 수행될 필요가 없는 고루틴들은
+//모두 하나의 스레드에서 순차적으로 수행되며, 이것이 컴파일 시간에 예측 가능한 경우가 많기에
+//스레드를 많이 만드는 경우에 생길 수 잇는 비용이 발생하지 않는다.
+
+func FanIn3(in1, in2, in3 <-chan int) <-chan int {
+	out := make(chan int)
+	openCnt := 3
+
+	closeChan := func(c *<-chan int) bool {
+		*c = nil
+		//openCnt를 줄여 열린채널갯수를 조정
+		openCnt--
+		return openCnt == 0
+	}
+	go func() {
+		defer close(out)
+		for {
+			select {
+			case n, ok := <-in1:
+				if ok {
+					out <- n
+				} else if closeChan(&in1) {
+					return
+				}
+			case n, ok := <-in2:
+				if ok {
+					out <- n
+				} else if closeChan(&in2) {
+					return
+				}
+			case n, ok := <-in3:
+				if ok {
+					out <- n
+				} else if closeChan(&in3) {
+					return
+				}
+			}
+		}
+	}()
+	return out
+}
+
+func ExampleFanIn3() {
+	c1, c2, c3 := make(chan int), make(chan int), make(chan int)
+	sendInts := func(c chan<- int, begin, end int) {
+		defer close(c)
+		for i := begin; i < end; i++ {
+			c <- i
+		}
+	}
+	go sendInts(c1, 11, 14)
+	go sendInts(c2, 21, 23)
+	go sendInts(c3, 31, 35)
+	for n := range FanIn3(c1, c2, c3) {
+		fmt.Print(n, ",")
+	}
 }

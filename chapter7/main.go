@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/zip"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -62,6 +63,8 @@ func main() {
 	ExampleSimpleChannel()
 	ExampleFibonacci()
 	ExampleBabyNames()
+	fmt.Println("----")
+	ExampleFanIn3()
 }
 
 //download는 url에 담겨있는 파일을 다운받아 파일이름과 에러를 반환한다.
