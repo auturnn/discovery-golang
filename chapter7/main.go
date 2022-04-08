@@ -61,10 +61,17 @@ func main() {
 
 	// ExampleMin()
 	ExampleSimpleChannel()
+	fmt.Println("----")
 	ExampleFibonacci()
+	fmt.Println("----")
 	ExampleBabyNames()
 	fmt.Println("----")
 	ExampleFanIn3()
+	fmt.Println("----")
+	ExamplePlusOneWithContext()
+	fmt.Println("----")
+	ExamplePlusOneService()
+	fmt.Println("----")
 }
 
 //download는 url에 담겨있는 파일을 다운받아 파일이름과 에러를 반환한다.
