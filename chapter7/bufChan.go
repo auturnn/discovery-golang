@@ -61,7 +61,7 @@ func ExamplePlusOne() {
 }
 
 //아래는 일직선 파이프 라인 구성이다.
-type IntPipe func(<-chan int) <-chan int
+type IntPipe func(in <-chan int) <-chan int
 
 func Chain(ps ...IntPipe) IntPipe {
 	return func(in <-chan int) <-chan int {

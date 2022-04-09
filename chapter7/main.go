@@ -72,6 +72,8 @@ func main() {
 	fmt.Println("----")
 	ExamplePlusOneService()
 	fmt.Println("----")
+	max := 10
+	PrintPrimes(max)
 }
 
 //download는 url에 담겨있는 파일을 다운받아 파일이름과 에러를 반환한다.
